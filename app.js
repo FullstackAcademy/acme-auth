@@ -26,6 +26,16 @@ app.get('/api/auth', async(req, res, next)=> {
   }
 });
 
+app.get('/api/purchases', async(req, res, next)=> {
+  try {
+    const user = await User.byToken(req.headers.authorization);
+    res.send('TODO Send the purchases for this user');
+  }
+  catch(ex){
+    next(ex);
+  }
+});
+
 app.use((err, req, res, next)=> {
   console.log(err);
   res.status(err.status || 500).send({ error: err.message });
