@@ -4,6 +4,8 @@ app.use(express.json());
 const { models: { User }} = require('./db');
 const path = require('path');
 
+app.use('/dist', express.static(path.join(__dirname, 'dist')));
+
 app.get('/', (req, res)=> res.sendFile(path.join(__dirname, 'index.html')));
 
 app.post('/api/auth', async(req, res, next)=> {
