@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const Sequelize = require('sequelize');
 const { STRING } = Sequelize;
 const config = {
@@ -13,6 +14,13 @@ const conn = new Sequelize(process.env.DATABASE_URL || 'postgres://localhost/acm
 const User = conn.define('user', {
   username: STRING,
   password: STRING
+});
+
+User.addHook('beforeSave', async(user)=> {
+  if(user.changed('password')){
+    const hashed = await bcrypt.hash(user.password, 3);
+    user.password = hashed;
+  }
 });
 
 User.byToken = async(token)=> {
@@ -36,11 +44,10 @@ User.byToken = async(token)=> {
 User.authenticate = async({ username, password })=> {
   const user = await User.findOne({
     where: {
-      username,
-      password
+      username
     }
   });
-  if(user){
+  if(user && await bcrypt.compare(password, user.password) ){
     return jwt.sign({ id: user.id}, process.env.JWT); 
   }
   const error = Error('bad credentials!!!!!!');
